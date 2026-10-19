@@ -1,135 +1,42 @@
 
 "use strict";
 
-// ==========================================
-// COOKIE CLICKER - GAME SETTINGS
-// ==========================================
+// ========================================
+// COOKIE EMPIRE — GAME SETTINGS
+// ========================================
 
 const SAVE_KEY = "cookieClickerModernSave_v1";
 const SAVE_VERSION = 1;
 const PRESTIGE_REQUIREMENT = 1_000_000;
 const PRESTIGE_BONUS_PER_STAR = 0.10;
+const REBIRTH_REQUIREMENT = 100_000;
+const REBIRTH_BONUS = 0.05;
 
 const BUILDINGS = [
-  {
-    id: "cursor",
-    name: "Cursor",
-    icon: "🖱️",
-    description: "An extra hand to click for you.",
-    baseCost: 15,
-    cps: 0.1
-  },
-  {
-    id: "grandma",
-    name: "Grandma",
-    icon: "👵",
-    description: "A loving grandma who bakes cookies.",
-    baseCost: 100,
-    cps: 1
-  },
-  {
-    id: "farm",
-    name: "Cookie Farm",
-    icon: "🌱",
-    description: "Grow an entire field of cookie dough.",
-    baseCost: 1100,
-    cps: 8
-  },
-  {
-    id: "mine",
-    name: "Cookie Mine",
-    icon: "⛏️",
-    description: "Mine delicious cookie deposits.",
-    baseCost: 12000,
-    cps: 47
-  },
-  {
-    id: "factory",
-    name: "Factory",
-    icon: "🏭",
-    description: "Mass-produce cookies around the clock.",
-    baseCost: 130000,
-    cps: 260
-  },
-  {
-    id: "bank",
-    name: "Cookie Bank",
-    icon: "🏦",
-    description: "Put your cookie empire to work.",
-    baseCost: 1_400_000,
-    cps: 1400
-  }
+  { id: "cursor", name: "Cursor", icon: "🖱️", description: "An extra hand to click for you.", baseCost: 15, cps: 0.1 },
+  { id: "grandma", name: "Grandma", icon: "👵", description: "A loving grandma who bakes cookies.", baseCost: 100, cps: 1 },
+  { id: "farm", name: "Cookie Farm", icon: "🌱", description: "Grow an entire field of cookie dough.", baseCost: 1100, cps: 8 },
+  { id: "mine", name: "Cookie Mine", icon: "⛏️", description: "Mine delicious cookie deposits.", baseCost: 12000, cps: 47 },
+  { id: "factory", name: "Factory", icon: "🏭", description: "Mass-produce cookies around the clock.", baseCost: 130000, cps: 260 },
+  { id: "bank", name: "Cookie Bank", icon: "🏦", description: "Put your cookie empire to work.", baseCost: 1400000, cps: 1400 }
 ];
 
 const ACHIEVEMENTS = [
-  {
-    id: "first",
-    name: "First Crumb",
-    icon: "🍪",
-    description: "Bake your first cookie.",
-    goal: 1
-  },
-  {
-    id: "hundred",
-    name: "Getting Started",
-    icon: "✨",
-    description: "Bake 100 lifetime cookies.",
-    goal: 100
-  },
-  {
-    id: "thousand",
-    name: "Cookie Collector",
-    icon: "🧺",
-    description: "Bake 1,000 lifetime cookies.",
-    goal: 1000
-  },
-  {
-    id: "tenThousand",
-    name: "Cookie Enthusiast",
-    icon: "💜",
-    description: "Bake 10,000 lifetime cookies.",
-    goal: 10000
-  },
-  {
-    id: "hundredThousand",
-    name: "Cookie Tycoon",
-    icon: "💰",
-    description: "Bake 100,000 lifetime cookies.",
-    goal: 100000
-  },
-  {
-    id: "million",
-    name: "Millionaire Baker",
-    icon: "👑",
-    description: "Bake 1 million lifetime cookies.",
-    goal: 1000000
-  },
-  {
-    id: "tenMillion",
-    name: "Cookie Legend",
-    icon: "🌟",
-    description: "Bake 10 million lifetime cookies.",
-    goal: 10000000
-  },
-  {
-    id: "builder",
-    name: "Big Business",
-    icon: "🏗️",
-    description: "Own 25 buildings at once.",
-    buildingGoal: 25
-  }
+  { id: "first", name: "First Crumb", icon: "🍪", description: "Bake your first cookie.", goal: 1 },
+  { id: "hundred", name: "Getting Started", icon: "✨", description: "Bake 100 lifetime cookies.", goal: 100 },
+  { id: "thousand", name: "Cookie Collector", icon: "🧺", description: "Bake 1,000 lifetime cookies.", goal: 1000 },
+  { id: "tenThousand", name: "Cookie Enthusiast", icon: "💜", description: "Bake 10,000 lifetime cookies.", goal: 10000 },
+  { id: "hundredThousand", name: "Cookie Tycoon", icon: "💰", description: "Bake 100,000 lifetime cookies.", goal: 100000 },
+  { id: "million", name: "Millionaire Baker", icon: "👑", description: "Bake 1 million lifetime cookies.", goal: 1000000 },
+  { id: "tenMillion", name: "Cookie Legend", icon: "🌟", description: "Bake 10 million lifetime cookies.", goal: 10000000 },
+  { id: "builder", name: "Big Business", icon: "🏗️", description: "Own 25 buildings at once.", buildingGoal: 25 }
 ];
 
-// ==========================================
-// GAME STATE
-// ==========================================
+const $ = id => document.getElementById(id);
 
-function createInitialState() {
+function initialState() {
   const buildings = {};
-
-  for (const building of BUILDINGS) {
-    buildings[building.id] = 0;
-  }
+  BUILDINGS.forEach(b => buildings[b.id] = 0);
 
   return {
     cookies: 0,
@@ -138,21 +45,23 @@ function createInitialState() {
     totalClicks: 0,
     buildings,
     achievements: [],
-    prestige: 0
+    prestige: 0,
+    rebirths: 0,
+    redeemedCodes: [],
+    settings: {
+      clickEffects: true,
+      music: false,
+      reducedMotion: false
+    }
   };
 }
 
-let state = createInitialState();
+let state = initialState();
 let lastTick = Date.now();
 let lastRender = 0;
 let lastSave = 0;
-let toastTimeout = null;
-
-// ==========================================
-// DOM HELPERS
-// ==========================================
-
-const $ = (id) => document.getElementById(id);
+let toastTimeout;
+let buyMode = 1;
 
 const ui = {
   cookieCount: $("cookieCount"),
@@ -161,7 +70,6 @@ const ui = {
   buildingCount: $("buildingCount"),
   lifetimeCookies: $("lifetimeCookies"),
   prestigeLevel: $("prestigeLevel"),
-  shopCount: $("shopCount"),
   shopList: $("shopList"),
   achievementCount: $("achievementCount"),
   achievementList: $("achievementList"),
@@ -174,181 +82,149 @@ const ui = {
   progressFill: $("progressFill"),
   achievementProgress: $("achievementProgress"),
   saveStatus: $("saveStatus"),
-  toast: $("toast")
+  toast: $("toast"),
+  rebirthCount: $("rebirthCount"),
+  rebirthBonus: $("rebirthBonus"),
+  rebirthNote: $("rebirthNote"),
+  rebirthButton: $("rebirthButton"),
+  clickEffectsToggle: $("clickEffectsToggle"),
+  musicToggle: $("musicToggle"),
+  reducedMotionToggle: $("reducedMotionToggle")
 };
 
-// ==========================================
-// NUMBER FORMATTING
-// ==========================================
+// ========================================
+// NUMBERS AND GAME CALCULATIONS
+// ========================================
 
-function formatNumber(number) {
-  if (!Number.isFinite(number)) return "∞";
-
-  if (number < 1000) {
-    return number.toLocaleString("en-US", {
-      maximumFractionDigits: number < 10 ? 1 : 0
+function formatNumber(n) {
+  if (!Number.isFinite(n)) return "∞";
+  if (n < 1000) {
+    return n.toLocaleString("en-US", {
+      maximumFractionDigits: n < 10 ? 1 : 0
     });
   }
 
-  const suffixes = [
-    "", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No"
-  ];
+  const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No"];
+  const tier = Math.floor(Math.log10(n) / 3);
+  if (tier >= suffixes.length) return n.toExponential(2);
 
-  const tier = Math.floor(Math.log10(number) / 3);
-
-  if (tier >= suffixes.length) {
-    return number.toExponential(2);
-  }
-
-  const scaled = number / Math.pow(1000, tier);
-
-  return scaled.toLocaleString("en-US", {
+  return (n / Math.pow(1000, tier)).toLocaleString("en-US", {
     maximumFractionDigits: 2
   }) + suffixes[tier];
 }
 
-function formatPrice(number) {
-  return formatNumber(Math.ceil(number));
+function buildingCount() {
+  return BUILDINGS.reduce((sum, b) => sum + state.buildings[b.id], 0);
 }
 
-// ==========================================
-// GAME CALCULATIONS
-// ==========================================
+function totalMultiplier() {
+  return (1 + state.prestige * PRESTIGE_BONUS_PER_STAR) *
+         (1 + state.rebirths * REBIRTH_BONUS);
+}
 
-function getBuildingCount() {
+function clickPower() {
+  return totalMultiplier();
+}
+
+function cookiesPerSecond() {
   return BUILDINGS.reduce(
-    (sum, building) => sum + state.buildings[building.id],
-    0
-  );
+    (sum, b) => sum + state.buildings[b.id] * b.cps, 0
+  ) * totalMultiplier();
 }
 
-function getClickPower() {
-  return 1 * (1 + state.prestige * PRESTIGE_BONUS_PER_STAR);
-}
-
-function getBaseCps() {
-  return BUILDINGS.reduce(
-    (sum, building) =>
-      sum + state.buildings[building.id] * building.cps,
-    0
-  );
-}
-
-function getCps() {
-  return getBaseCps() * (
-    1 + state.prestige * PRESTIGE_BONUS_PER_STAR
-  );
-}
-
-function getBuildingCost(building) {
-  const owned = state.buildings[building.id];
+function buildingCost(building, owned = state.buildings[building.id]) {
   return Math.ceil(building.baseCost * Math.pow(1.15, owned));
 }
 
-function getPotentialPrestige() {
-  return Math.floor(
-    Math.sqrt(state.totalEarned / PRESTIGE_REQUIREMENT)
+function availableStars() {
+  return Math.max(
+    0,
+    Math.floor(Math.sqrt(state.totalEarned / PRESTIGE_REQUIREMENT)) -
+      state.prestige
   );
 }
 
-function getAvailableStars() {
-  return Math.max(0, getPotentialPrestige() - state.prestige);
-}
+// ========================================
+// NOTIFICATIONS AND CLICKING
+// ========================================
 
-// ==========================================
-// NOTIFICATIONS
-// ==========================================
-
-function showToast(message) {
+function toast(message) {
   ui.toast.textContent = message;
   ui.toast.classList.add("visible");
-
   clearTimeout(toastTimeout);
-
-  toastTimeout = setTimeout(() => {
-    ui.toast.classList.remove("visible");
-  }, 2600);
+  toastTimeout = setTimeout(() => ui.toast.classList.remove("visible"), 2600);
 }
-
-function setSaveStatus(message, color) {
-  ui.saveStatus.textContent = "● " + message;
-  ui.saveStatus.style.color = color;
-}
-
-// ==========================================
-// CLICKING THE COOKIE
-// ==========================================
 
 function clickCookie(event) {
-  const amount = getClickPower();
+  const amount = clickPower();
 
   state.cookies += amount;
   state.runEarned += amount;
   state.totalEarned += amount;
   state.totalClicks++;
 
-  showFloatingNumber(amount, event);
-  ui.cookieButton.classList.remove("clicked");
+  if (state.settings.clickEffects) showFloatingNumber(amount, event);
 
-  // Restart the animation when the cookie is clicked.
-  void ui.cookieButton.offsetWidth;
-  ui.cookieButton.classList.add("clicked");
+  if (!state.settings.reducedMotion) {
+    ui.cookieButton.classList.remove("clicked");
+    void ui.cookieButton.offsetWidth;
+    ui.cookieButton.classList.add("clicked");
+  }
 
   checkAchievements();
   render();
 }
 
 function showFloatingNumber(amount, event) {
-  const floating = document.createElement("span");
-  floating.className = "float-number";
-  floating.textContent = "+" + formatNumber(amount);
+  const el = document.createElement("span");
+  el.className = "float-number";
+  el.textContent = "+" + formatNumber(amount);
 
-  const layerRect = ui.floatingLayer.getBoundingClientRect();
+  const rect = ui.floatingLayer.getBoundingClientRect();
+  el.style.left = `${(event?.clientX || rect.left + rect.width / 2) - rect.left}px`;
+  el.style.top = `${(event?.clientY || rect.top + rect.height / 2) - rect.top}px`;
 
-  let x;
-  let y;
-
-  if (
-    event &&
-    Number.isFinite(event.clientX) &&
-    event.clientX !== 0
-  ) {
-    x = event.clientX - layerRect.left;
-    y = event.clientY - layerRect.top;
-  } else {
-    x = layerRect.width / 2;
-    y = layerRect.height / 2;
-  }
-
-  floating.style.left = `${x}px`;
-  floating.style.top = `${y}px`;
-
-  ui.floatingLayer.appendChild(floating);
-
-  setTimeout(() => floating.remove(), 950);
+  ui.floatingLayer.appendChild(el);
+  setTimeout(() => el.remove(), 950);
 }
 
-// ==========================================
-// BUYING BUILDINGS
-// ==========================================
+// ========================================
+// SHOP AND BULK PURCHASES
+// ========================================
+
+function bulkCost(building) {
+  const owned = state.buildings[building.id];
+  let count = 0;
+  let total = 0;
+  let remaining = state.cookies;
+
+  const limit = buyMode === "max" ? 10000 : buyMode;
+
+  while (count < limit) {
+    const cost = buildingCost(building, owned + count);
+    if (remaining < cost) break;
+    remaining -= cost;
+    total += cost;
+    count++;
+  }
+
+  return { count, total };
+}
 
 function buyBuilding(id) {
-  const building = BUILDINGS.find((item) => item.id === id);
-
+  const building = BUILDINGS.find(b => b.id === id);
   if (!building) return;
 
-  const cost = getBuildingCost(building);
-
-  if (state.cookies < cost) {
-    showToast("You need more cookies!");
+  const purchase = bulkCost(building);
+  if (!purchase.count) {
+    toast("You need more cookies!");
     return;
   }
 
-  state.cookies -= cost;
-  state.buildings[id]++;
+  state.cookies -= purchase.total;
+  state.buildings[id] += purchase.count;
 
-  showToast(`${building.name} purchased!`);
-
+  toast(`${purchase.count} ${building.name}${purchase.count > 1 ? "s" : ""} purchased!`);
   checkAchievements();
   render();
   saveGame();
@@ -357,10 +233,10 @@ function buyBuilding(id) {
 function renderShop() {
   ui.shopList.innerHTML = "";
 
-  for (const building of BUILDINGS) {
+  BUILDINGS.forEach(building => {
     const owned = state.buildings[building.id];
-    const cost = getBuildingCost(building);
-    const affordable = state.cookies >= cost;
+    const purchase = bulkCost(building);
+    const affordable = purchase.count > 0;
 
     const card = document.createElement("div");
     card.className = "shop-item" + (affordable ? " affordable" : "");
@@ -387,32 +263,28 @@ function renderShop() {
 
     info.append(name, description, ownedLabel);
 
-    const buyButton = document.createElement("button");
-    buyButton.className = "buy-button";
-    buyButton.disabled = !affordable;
-    buyButton.type = "button";
-    buyButton.setAttribute(
-      "aria-label",
-      `Buy ${building.name} for ${formatPrice(cost)} cookies`
-    );
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "buy-button";
+    button.disabled = !affordable;
 
-    const buyLabel = document.createElement("strong");
-    buyLabel.textContent = "BUY";
+    const label = document.createElement("strong");
+    label.textContent = `BUY ${purchase.count}`;
 
-    const priceLabel = document.createElement("span");
-    priceLabel.textContent = "🍪 " + formatPrice(cost);
+    const price = document.createElement("span");
+    price.textContent = "🍪 " + formatNumber(purchase.total);
 
-    buyButton.append(buyLabel, priceLabel);
-    buyButton.addEventListener("click", () => buyBuilding(building.id));
+    button.append(label, price);
+    button.addEventListener("click", () => buyBuilding(building.id));
 
-    card.append(icon, info, buyButton);
+    card.append(icon, info, button);
     ui.shopList.appendChild(card);
-  }
+  });
 }
 
-// ==========================================
+// ========================================
 // ACHIEVEMENTS
-// ==========================================
+// ========================================
 
 function hasAchievement(id) {
   return state.achievements.includes(id);
@@ -421,298 +293,445 @@ function hasAchievement(id) {
 function checkAchievements() {
   let unlockedAny = false;
 
-  for (const achievement of ACHIEVEMENTS) {
-    if (hasAchievement(achievement.id)) continue;
+  ACHIEVEMENTS.forEach(a => {
+    if (hasAchievement(a.id)) return;
 
-    let unlocked = false;
-
-    if (achievement.goal !== undefined) {
-      unlocked = state.totalEarned >= achievement.goal;
-    }
-
-    if (achievement.buildingGoal !== undefined) {
-      unlocked = getBuildingCount() >= achievement.buildingGoal;
-    }
+    const unlocked = a.goal !== undefined
+      ? state.totalEarned >= a.goal
+      : buildingCount() >= a.buildingGoal;
 
     if (unlocked) {
-      state.achievements.push(achievement.id);
-      showToast("Achievement unlocked: " + achievement.name);
+      state.achievements.push(a.id);
+      toast("Achievement unlocked: " + a.name);
       unlockedAny = true;
     }
-  }
+  });
 
   if (unlockedAny) saveGame();
 }
 
 function renderAchievements() {
   ui.achievementList.innerHTML = "";
-
   let unlockedCount = 0;
 
-  for (const achievement of ACHIEVEMENTS) {
-    const unlocked = hasAchievement(achievement.id);
-
+  ACHIEVEMENTS.forEach(a => {
+    const unlocked = hasAchievement(a.id);
     if (unlocked) unlockedCount++;
 
     const card = document.createElement("div");
-    card.className =
-      "achievement-item" + (unlocked ? " unlocked" : "");
+    card.className = "achievement-item" + (unlocked ? " unlocked" : "");
 
     const icon = document.createElement("div");
     icon.className = "achievement-icon";
-    icon.textContent = achievement.icon;
+    icon.textContent = a.icon;
 
     const info = document.createElement("div");
     info.className = "achievement-info";
 
     const name = document.createElement("div");
     name.className = "achievement-name";
-    name.textContent = achievement.name;
+    name.textContent = a.name;
 
-    const description = document.createElement("div");
-    description.className = "achievement-description";
-    description.textContent = achievement.description;
+    const desc = document.createElement("div");
+    desc.className = "achievement-description";
+    desc.textContent = a.description;
 
-    info.append(name, description);
+    info.append(name, desc);
     card.append(icon, info);
 
     if (unlocked) {
       const check = document.createElement("span");
       check.className = "achievement-check";
       check.textContent = "✓";
-      check.setAttribute("aria-label", "Unlocked");
       card.appendChild(check);
     }
 
     ui.achievementList.appendChild(card);
-  }
+  });
 
-  ui.achievementCount.textContent =
-    `${unlockedCount} / ${ACHIEVEMENTS.length}`;
+  ui.achievementCount.textContent = `${unlockedCount} / ${ACHIEVEMENTS.length}`;
 }
 
-// ==========================================
-// PRESTIGE / ASCENSION
-// ==========================================
+// ========================================
+// PRESTIGE
+// ========================================
 
 function renderPrestige() {
-  const available = getAvailableStars();
-  const bonus = state.prestige * PRESTIGE_BONUS_PER_STAR * 100;
-  const nextTarget =
-    Math.pow(state.prestige + 1, 2) * PRESTIGE_REQUIREMENT;
+  const available = availableStars();
+  const nextTarget = Math.pow(state.prestige + 1, 2) * PRESTIGE_REQUIREMENT;
 
   ui.availableStars.textContent = formatNumber(available);
   ui.prestigeLevel.textContent = formatNumber(state.prestige);
-  ui.prestigeBonus.textContent = "+" + formatNumber(bonus) + "%";
+  ui.prestigeBonus.textContent =
+    "+" + formatNumber((state.prestige * PRESTIGE_BONUS_PER_STAR +
+      state.rebirths * REBIRTH_BONUS) * 100) + "%";
 
   ui.prestigeButton.disabled = available < 1;
 
   if (available > 0) {
     ui.prestigeNote.textContent =
-      `Ascend now for ${formatNumber(available)} star(s). ` +
-      "Your current cookies and buildings will be reset.";
-    ui.prestigeButton.textContent =
-      `Ascend for ${formatNumber(available)} star(s)`;
+      `Ascend now for ${formatNumber(available)} star(s). Cookies and buildings will reset.`;
+    ui.prestigeButton.textContent = `Ascend for ${formatNumber(available)} star(s)`;
   } else {
-    const remaining = Math.max(0, nextTarget - state.totalEarned);
-
     ui.prestigeNote.textContent =
-      `Bake ${formatNumber(remaining)} more lifetime cookies ` +
-      "to reach your next prestige milestone.";
+      `Bake ${formatNumber(Math.max(0, nextTarget - state.totalEarned))} more lifetime cookies to reach your next milestone.`;
     ui.prestigeButton.textContent = "Ascend to a new era";
   }
+
+  renderRebirth();
 }
 
 function ascend() {
-  const available = getAvailableStars();
+  const available = availableStars();
+  if (available < 1) return toast("You need more lifetime cookies to ascend.");
 
-  if (available < 1) {
-    showToast("You need more lifetime cookies to ascend.");
-    return;
-  }
-
-  const confirmed = window.confirm(
+  if (!confirm(
     `Ascend and earn ${available} prestige star(s)?\n\n` +
-    "Your current cookies and buildings will be reset. " +
-    "Lifetime cookies, achievements, and existing prestige bonuses remain."
-  );
-
-  if (!confirmed) return;
+    "Your current cookies and buildings reset. Lifetime cookies, achievements, and rebirths remain."
+  )) return;
 
   state.prestige += available;
   state.cookies = 0;
   state.runEarned = 0;
-  state.buildings = {};
+  BUILDINGS.forEach(b => state.buildings[b.id] = 0);
 
-  for (const building of BUILDINGS) {
-    state.buildings[building.id] = 0;
+  lastTick = Date.now();
+  render();
+  saveGame();
+  closePanels();
+  toast("A new era begins! Your bakery is stronger.");
+}
+
+// ========================================
+// REBIRTH
+// ========================================
+
+function renderRebirth() {
+  $("rebirthCount").textContent = formatNumber(state.rebirths);
+  $("rebirthBonus").textContent = "+" + formatNumber(state.rebirths * 5) + "%";
+
+  const ready = state.runEarned >= REBIRTH_REQUIREMENT;
+  ui.rebirthButton.disabled = !ready;
+
+  ui.rebirthNote.textContent = ready
+    ? "Ready! Rebirth resets current cookies and buildings."
+    : `Earn ${formatNumber(REBIRTH_REQUIREMENT - state.runEarned)} more cookies this run to unlock rebirth.`;
+}
+
+function doRebirth() {
+  if (state.runEarned < REBIRTH_REQUIREMENT) {
+    return toast("Earn 100,000 cookies this run to rebirth.");
   }
 
-  // Lifetime cookies and achievements intentionally persist.
-  lastTick = Date.now();
+  if (!confirm(
+    "Rebirth now? Your current cookies and buildings reset, " +
+    "but lifetime cookies, achievements, prestige, and rebirth bonuses stay."
+  )) return;
 
+  state.rebirths++;
+  state.cookies = 0;
+  state.runEarned = 0;
+  BUILDINGS.forEach(b => state.buildings[b.id] = 0);
+
+  lastTick = Date.now();
+  render();
+  saveGame();
+  closePanels();
+  toast("Rebirth complete! Permanent production increased by 5%.");
+}
+
+// ========================================
+// SETTINGS
+// ========================================
+
+function syncSettings() {
+  ui.clickEffectsToggle.checked = state.settings.clickEffects;
+  ui.musicToggle.checked = state.settings.music;
+  ui.reducedMotionToggle.checked = state.settings.reducedMotion;
+
+  document.body.classList.toggle("reduced-motion", state.settings.reducedMotion);
+}
+
+function applySettings() {
+  state.settings.clickEffects = ui.clickEffectsToggle.checked;
+  state.settings.music = ui.musicToggle.checked;
+  state.settings.reducedMotion = ui.reducedMotionToggle.checked;
+
+  document.body.classList.toggle("reduced-motion", state.settings.reducedMotion);
+  saveGame();
+
+  if (state.settings.music) {
+    toast("Music setting enabled. Background audio needs an audio track to play.");
+  }
+}
+
+// ========================================
+// REDEEM CODES
+// ========================================
+
+function redeemCode(event) {
+  event.preventDefault();
+
+  const code = $("codeInput").value.trim().toUpperCase();
+  const rewards = {
+    COOKIESTART: 1000,
+    GOLDENCOOKIE: 10000
+  };
+
+  if (!code) return toast("Enter a code first.");
+  if (!Object.hasOwn(rewards, code)) return toast("That code isn't valid.");
+  if (state.redeemedCodes.includes(code)) {
+    return toast("You've already redeemed that code.");
+  }
+
+  const reward = rewards[code];
+  state.cookies += reward;
+  state.runEarned += reward;
+  state.totalEarned += reward;
+  state.redeemedCodes.push(code);
+
+  $("codeInput").value = "";
   checkAchievements();
   render();
   saveGame();
-
-  showToast("A new era begins! Your bakery is stronger.");
+  closePanels();
+  toast(`Code redeemed! +${formatNumber(reward)} cookies.`);
 }
 
-// ==========================================
-// SAVING AND LOADING
-// ==========================================
+// ========================================
+// MENUS AND PANELS
+// ========================================
+
+function openPanel(id) {
+  document.querySelectorAll(".modal").forEach(panel => {
+    panel.hidden = panel.id !== id;
+  });
+
+  $("modalBackdrop").hidden = false;
+  $("menuDropdown").hidden = true;
+  $("menuButton").setAttribute("aria-expanded", "false");
+
+  if (id === "rebirthModal") renderRebirth();
+}
+
+function closePanels() {
+  $("modalBackdrop").hidden = true;
+  $("shopDrawer").hidden = true;
+  $("shopButton").setAttribute("aria-expanded", "false");
+}
+
+function toggleShop() {
+  const drawer = $("shopDrawer");
+  const opening = drawer.hidden;
+
+  drawer.hidden = !opening;
+  $("shopButton").setAttribute("aria-expanded", String(opening));
+
+  if (opening) {
+    $("menuDropdown").hidden = true;
+    $("menuButton").setAttribute("aria-expanded", "false");
+  }
+}
+
+$("menuButton").addEventListener("click", () => {
+  const dropdown = $("menuDropdown");
+  dropdown.hidden = !dropdown.hidden;
+  $("menuButton").setAttribute("aria-expanded", String(!dropdown.hidden));
+
+  if (!dropdown.hidden) {
+    $("shopDrawer").hidden = true;
+    $("shopButton").setAttribute("aria-expanded", "false");
+  }
+});
+
+document.querySelectorAll("[data-open-panel]").forEach(button => {
+  button.addEventListener("click", () => openPanel(button.dataset.openPanel));
+});
+
+document.querySelectorAll("[data-close-modal], [data-close-panel]").forEach(button => {
+  button.addEventListener("click", closePanels);
+});
+
+$("modalBackdrop").addEventListener("click", event => {
+  if (event.target === $("modalBackdrop")) closePanels();
+});
+
+$("shopButton").addEventListener("click", toggleShop);
+$("settingsDoneButton").addEventListener("click", () => {
+  applySettings();
+  closePanels();
+});
+
+[
+  ui.clickEffectsToggle,
+  ui.musicToggle,
+  ui.reducedMotionToggle
+].forEach(input => input.addEventListener("change", applySettings));
+
+$("rebirthButton").addEventListener("click", doRebirth);
+$("codeForm").addEventListener("submit", redeemCode);
+
+document.querySelectorAll("[data-buy-mode]").forEach(button => {
+  button.addEventListener("click", () => {
+    const value = button.dataset.buyMode;
+    buyMode = value === "max" ? "max" : Number(value);
+
+    document.querySelectorAll("[data-buy-mode]").forEach(item => {
+      item.classList.toggle("active", item === button);
+    });
+
+    renderShop();
+  });
+});
+
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape") closePanels();
+});
+
+// ========================================
+// SAVE AND LOAD
+// ========================================
 
 function saveGame() {
   try {
-    const saveData = {
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
       version: SAVE_VERSION,
       savedAt: Date.now(),
       state
-    };
+    }));
 
-    localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
     lastSave = Date.now();
-    setSaveStatus("Saved", "var(--green)");
+    if (ui.saveStatus) {
+      ui.saveStatus.textContent = "● Saved";
+      ui.saveStatus.style.color = "var(--green)";
+    }
   } catch (error) {
-    console.error("Could not save game:", error);
-    setSaveStatus("Save failed", "var(--red)");
-    showToast("Could not save. Check your browser storage settings.");
+    console.error("Save failed:", error);
+    toast("Could not save your game. Check browser storage settings.");
   }
 }
 
 function loadGame() {
   try {
     const raw = localStorage.getItem(SAVE_KEY);
-
     if (!raw) return;
 
-    const saveData = JSON.parse(raw);
+    const data = JSON.parse(raw);
+    if (!data?.state) return;
 
-    if (
-      !saveData ||
-      saveData.version !== SAVE_VERSION ||
-      !saveData.state
-    ) {
-      showToast("Save file not recognized. Starting a new game.");
-      return;
-    }
-
-    const loaded = saveData.state;
-    const initial = createInitialState();
-
-    // Validate numeric values before accepting a save.
-    const numericFields = [
-      "cookies",
-      "runEarned",
-      "totalEarned",
-      "totalClicks",
-      "prestige"
-    ];
-
-    for (const key of numericFields) {
-      if (
-        typeof loaded[key] !== "number" ||
-        !Number.isFinite(loaded[key]) ||
-        loaded[key] < 0
-      ) {
-        showToast("Save data was invalid. Starting a new game.");
-        return;
-      }
-    }
+    const loaded = data.state;
+    const fresh = initialState();
 
     state = {
-      ...initial,
-      cookies: loaded.cookies,
-      runEarned: loaded.runEarned,
-      totalEarned: loaded.totalEarned,
-      totalClicks: loaded.totalClicks,
-      prestige: Math.floor(loaded.prestige),
-      buildings: { ...initial.buildings },
+      ...fresh,
+      cookies: validNumber(loaded.cookies),
+      runEarned: validNumber(loaded.runEarned),
+      totalEarned: validNumber(loaded.totalEarned),
+      totalClicks: validNumber(loaded.totalClicks),
+      prestige: Math.floor(validNumber(loaded.prestige)),
+      rebirths: Math.floor(validNumber(loaded.rebirths)),
+      buildings: { ...fresh.buildings },
       achievements: Array.isArray(loaded.achievements)
-        ? loaded.achievements.filter((id) =>
-            ACHIEVEMENTS.some((a) => a.id === id)
-          )
-        : []
+        ? loaded.achievements.filter(id => ACHIEVEMENTS.some(a => a.id === id))
+        : [],
+      redeemedCodes: Array.isArray(loaded.redeemedCodes)
+        ? loaded.redeemedCodes.filter(code => typeof code === "string")
+        : [],
+      settings: {
+        clickEffects: loaded.settings?.clickEffects !== false,
+        music: loaded.settings?.music === true,
+        reducedMotion: loaded.settings?.reducedMotion === true
+      }
     };
 
-    for (const building of BUILDINGS) {
-      const count = loaded.buildings?.[building.id];
+    BUILDINGS.forEach(b => {
+      state.buildings[b.id] = Math.floor(validNumber(loaded.buildings?.[b.id]));
+    });
 
-      if (
-        typeof count === "number" &&
-        Number.isFinite(count) &&
-        count >= 0
-      ) {
-        state.buildings[building.id] = Math.floor(count);
-      }
-    }
-
-    // Repair achievements in case a save happened before an unlock.
     checkAchievements();
 
-    // Offline production: up to 8 hours while the page was closed.
-    if (typeof saveData.savedAt === "number") {
-      const elapsedSeconds = Math.min(
-        Math.max(0, (Date.now() - saveData.savedAt) / 1000),
+    // Keep the existing game's offline production feature.
+    if (typeof data.savedAt === "number") {
+      const seconds = Math.min(
+        Math.max(0, (Date.now() - data.savedAt) / 1000),
         8 * 60 * 60
       );
 
-      const offlineCookies = getCps() * elapsedSeconds;
+      const offline = cookiesPerSecond() * seconds;
 
-      if (offlineCookies > 0 && Number.isFinite(offlineCookies)) {
-        state.cookies += offlineCookies;
-        state.runEarned += offlineCookies;
-        state.totalEarned += offlineCookies;
-
-        showToast(
-          `Welcome back! You earned ${formatNumber(offlineCookies)} cookies offline.`
-        );
+      if (offline > 0 && Number.isFinite(offline)) {
+        state.cookies += offline;
+        state.runEarned += offline;
+        state.totalEarned += offline;
+        toast(`Welcome back! You earned ${formatNumber(offline)} cookies offline.`);
       }
     }
   } catch (error) {
     console.error("Could not load game:", error);
-    showToast("Could not load your save. Starting a new game.");
-    state = createInitialState();
+    state = initialState();
   }
 }
 
-// ==========================================
-// MAIN DISPLAY
-// ==========================================
+function validNumber(value) {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0
+    ? value
+    : 0;
+}
+
+// ========================================
+// RESET GAME
+// ========================================
+
+function resetGame() {
+  if (!confirm(
+    "Reset your entire game?\n\nThis deletes cookies, buildings, achievements, prestige, and rebirths. This cannot be undone."
+  )) return;
+
+  state = initialState();
+
+  try {
+    localStorage.removeItem(SAVE_KEY);
+  } catch (error) {
+    console.error("Could not clear save:", error);
+  }
+
+  lastTick = Date.now();
+  render();
+  saveGame();
+  toast("Fresh bakery! Let's start clicking.");
+}
+
+// ========================================
+// RENDER THE GAME
+// ========================================
 
 function render() {
   ui.cookieCount.textContent = formatNumber(state.cookies);
-  ui.clickPower.textContent = formatNumber(getClickPower());
-  ui.cps.textContent = formatNumber(getCps());
-  ui.buildingCount.textContent = formatNumber(getBuildingCount());
+  ui.clickPower.textContent = formatNumber(clickPower());
+  ui.cps.textContent = formatNumber(cookiesPerSecond());
+  ui.buildingCount.textContent = formatNumber(buildingCount());
   ui.lifetimeCookies.textContent = formatNumber(state.totalEarned);
-  ui.shopCount.textContent = `${BUILDINGS.length} items`;
 
-  const nextGoal = ACHIEVEMENTS.find((achievement) =>
-    achievement.goal !== undefined &&
-    !hasAchievement(achievement.id)
+  const next = ACHIEVEMENTS.find(a =>
+    a.goal !== undefined && !hasAchievement(a.id)
   );
 
-  if (nextGoal) {
-    const previousGoal = [...ACHIEVEMENTS]
-      .filter((achievement) =>
-        achievement.goal !== undefined &&
-        achievement.goal < nextGoal.goal
-      )
-      .reduce((max, achievement) => Math.max(max, achievement.goal), 0);
+  if (next) {
+    const previous = Math.max(
+      0,
+      ...ACHIEVEMENTS
+        .filter(a => a.goal !== undefined && a.goal < next.goal)
+        .map(a => a.goal)
+    );
 
     const progress = Math.min(
       100,
-      Math.max(
-        0,
-        ((state.totalEarned - previousGoal) /
-          (nextGoal.goal - previousGoal)) * 100
-      )
+      Math.max(0, ((state.totalEarned - previous) / (next.goal - previous)) * 100)
     );
 
     ui.progressFill.style.width = progress + "%";
     ui.achievementProgress.textContent =
-      `${formatNumber(state.totalEarned)} / ${formatNumber(nextGoal.goal)} cookies`;
+      `${formatNumber(state.totalEarned)} / ${formatNumber(next.goal)} cookies`;
   } else {
     ui.progressFill.style.width = "100%";
     ui.achievementProgress.textContent = "All cookie milestones reached!";
@@ -723,16 +742,16 @@ function render() {
   renderPrestige();
 }
 
-// ==========================================
-// GAME LOOP
-// ==========================================
+// ========================================
+// GAME LOOP AND STARTUP
+// ========================================
 
 function gameLoop() {
   const now = Date.now();
   const elapsed = Math.min((now - lastTick) / 1000, 1);
   lastTick = now;
 
-  const produced = getCps() * elapsed;
+  const produced = cookiesPerSecond() * elapsed;
 
   if (produced > 0 && Number.isFinite(produced)) {
     state.cookies += produced;
@@ -741,48 +760,13 @@ function gameLoop() {
     checkAchievements();
   }
 
-  // Refresh the interface a few times per second.
   if (now - lastRender >= 200) {
     render();
     lastRender = now;
   }
 
-  // Periodic autosave.
-  if (now - lastSave >= 5000) {
-    saveGame();
-  }
+  if (now - lastSave >= 5000) saveGame();
 }
-
-// ==========================================
-// RESETTING THE GAME
-// ==========================================
-
-function resetGame() {
-  const confirmed = window.confirm(
-    "Reset your entire game?\n\n" +
-    "This deletes your cookies, buildings, achievements, and prestige. " +
-    "This cannot be undone."
-  );
-
-  if (!confirmed) return;
-
-  state = createInitialState();
-  lastTick = Date.now();
-
-  try {
-    localStorage.removeItem(SAVE_KEY);
-  } catch (error) {
-    console.error("Could not clear save:", error);
-  }
-
-  render();
-  saveGame();
-  showToast("Fresh bakery! Let's start clicking.");
-}
-
-// ==========================================
-// START THE GAME
-// ==========================================
 
 ui.cookieButton.addEventListener("click", clickCookie);
 ui.prestigeButton.addEventListener("click", ascend);
@@ -790,13 +774,13 @@ $("saveButton").addEventListener("click", saveGame);
 $("resetButton").addEventListener("click", resetGame);
 
 loadGame();
+syncSettings();
 render();
 lastTick = Date.now();
 
 setInterval(gameLoop, 100);
 window.addEventListener("beforeunload", saveGame);
 
-// Save when the player returns to the tab.
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "hidden") {
     saveGame();
