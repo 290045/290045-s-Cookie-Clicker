@@ -4,29 +4,47 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#17151f">
-  <title>290045's Cookie Clicker</title>
+  <meta name="theme-color" content="#111019">
+  <title>Cookie Empire</title>
   <link rel="stylesheet" href="styles.css">
   <script src="script.js" defer></script>
 </head>
-<body>
-  <header class="topbar">
-    <a class="brand" href="#">
-      <span class="brand-icon">C</span>
-      <span>COOKIE<span class="brand-light">CLICKER</span></span>
+<body class="game-screen">
+
+  <header class="topbar game-topbar">
+    <div class="left-controls">
+      <button class="icon-button" id="menuButton"
+        aria-label="Open game menu" aria-expanded="false">☰</button>
+
+      <div class="menu-dropdown" id="menuDropdown" hidden>
+        <button data-open-panel="settingsModal">⚙️ Settings</button>
+        <button data-open-panel="rebirthModal">🔄 Rebirth</button>
+        <button data-open-panel="prestigeModal">⭐ Prestige</button>
+        <button data-open-panel="achievementsModal">🏆 Achievements</button>
+        <button data-open-panel="codeModal">🎟️ Redeem Code</button>
+      </div>
+    </div>
+
+    <a class="brand" href="#" aria-label="Cookie Empire home">
+      <span class="brand-icon">🍪</span>
+      <span>COOKIE<span class="brand-light"> EMPIRE</span></span>
     </a>
+
     <div class="top-actions">
       <span class="save-status" id="saveStatus">● Saved</span>
       <button class="small-button" id="saveButton">Save</button>
       <button class="small-button danger-button" id="resetButton">Reset</button>
+      <button class="shop-toggle" id="shopButton"
+        aria-expanded="false">🏪 <span>Shop</span> ▾</button>
     </div>
   </header>
 
-  <main class="game-layout">
+  <main class="game-layout redesigned-layout">
+
     <section class="main-panel panel">
       <div class="eyebrow">YOUR BAKERY</div>
       <h1>Cookie Empire</h1>
-      <p class="subtitle">Every click brings you closer to cookie domination.</p>
+      <p class="subtitle">Click, bake, upgrade, repeat.</p>
 
       <div class="cookie-total" id="cookieCount">0</div>
       <div class="cookie-label">COOKIES BAKED</div>
@@ -48,20 +66,29 @@
 
       <div class="cookie-stage">
         <div class="cookie-glow"></div>
+
         <button class="cookie-button" id="cookieButton"
           aria-label="Bake a cookie" title="Click to bake cookies">
           <svg class="pixel-cookie" viewBox="0 0 128 128"
             xmlns="http://www.w3.org/2000/svg"
             shape-rendering="crispEdges" aria-hidden="true">
-            <path fill="#63371f" d="M40 8h40v8h16v8h8v16h8v32h-8v16h-8v16H80v8H40v-8H24V96h-8V80H8V48h8V32h8V24h16z"/>
-            <path fill="#c77b36" d="M40 16h40v8h16v16h8v32h-8v16H80v8H40v-8H24V80h-8V48h8V32h16z"/>
-            <path fill="#f2bd65" d="M40 24h40v8h16v16h8v24H96v16H80v8H40v-8H24V80h-8V48h8V40h16z"/>
-            <path fill="#ffe09a" d="M40 24h24v8H48v8H32v8h-8v16h-8V48h8V40h8V32h8z"/>
-            <path fill="#79401f" d="M40 32h8v8h-8z M72 24h8v8h-8z M88 40h8v8h-8z M32 56h8v8h-8z M56 72h8v8h-8z M80 64h8v8h-8z M40 88h8v8h-8z M72 88h8v8h-8z"/>
-            <path fill="#45271c" d="M40 32h8v8h-8z M72 24h8v8h-8z M88 40h8v8h-8z M32 56h8v8h-8z M56 72h8v8h-8z M80 64h8v8h-8z M40 88h8v8h-8z M72 88h8v8h-8z"/>
-            <path fill="#f8d98f" d="M32 40h8v8h-8z M48 24h8v8h-8z M24 48h8v8h-8z"/>
+            <path fill="#63371f"
+              d="M40 8h40v8h16v8h8v16h8v32h-8v16h-8v16H80v8H40v-8H24V96h-8V80H8V48h8V32h8V24h16z"/>
+            <path fill="#c77b36"
+              d="M40 16h40v8h16v16h8v32h-8v16H80v8H40v-8H24V80h-8V48h8V32h16z"/>
+            <path fill="#f2bd65"
+              d="M40 24h40v8h16v16h8v24H96v16H80v8H40v-8H24V80h-8V48h8V40h16z"/>
+            <path fill="#ffe09a"
+              d="M40 24h24v8H48v8H32v8h-8v16h-8V48h8V40h8V32h8z"/>
+            <path fill="#79401f"
+              d="M40 32h8v8h-8z M72 24h8v8h-8z M88 40h8v8h-8z M32 56h8v8h-8z M56 72h8v8h-8z M80 64h8v8h-8z M40 88h8v8h-8z M72 88h8v8h-8z"/>
+            <path fill="#45271c"
+              d="M40 32h8v8h-8z M72 24h8v8h-8z M88 40h8v8h-8z M32 56h8v8h-8z M56 72h8v8h-8z M80 64h8v8h-8z M40 88h8v8h-8z M72 88h8v8h-8z"/>
+            <path fill="#f8d98f"
+              d="M32 40h8v8h-8z M48 24h8v8h-8z M24 48h8v8h-8z"/>
           </svg>
         </button>
+
         <div class="click-hint">CLICK THE COOKIE!</div>
         <div class="floating-layer" id="floatingLayer"></div>
       </div>
@@ -88,66 +115,206 @@
       </div>
     </section>
 
-    <aside class="side-column">
-      <section class="panel shop-panel">
-        <div class="section-heading">
-          <div>
-            <div class="eyebrow">EXPAND YOUR EMPIRE</div>
-            <h2>Cookie Shop</h2>
-          </div>
-          <span class="item-count" id="shopCount">6 items</span>
+    <aside class="shop-drawer panel" id="shopDrawer"
+      aria-label="Cookie shop" hidden>
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">EXPAND YOUR EMPIRE</div>
+          <h2>Cookie Shop</h2>
         </div>
-        <p class="section-description">Purchase buildings to bake cookies automatically.</p>
-        <div class="shop-list" id="shopList"></div>
-      </section>
+        <button class="close-button" data-close-panel="shopDrawer"
+          aria-label="Close shop">✕</button>
+      </div>
 
-      <section class="panel achievement-panel">
-        <div class="section-heading">
-          <div>
-            <div class="eyebrow">MILESTONES</div>
-            <h2>Achievements</h2>
-          </div>
-          <span class="item-count" id="achievementCount">0 / 8</span>
-        </div>
-        <div class="achievement-list" id="achievementList"></div>
-      </section>
+      <p class="section-description">
+        Purchase buildings to bake cookies automatically.
+      </p>
 
-      <section class="panel prestige-panel">
-        <div class="prestige-top">
-          <div class="prestige-icon">✦</div>
-          <div>
-            <div class="eyebrow">THE NEXT CHAPTER</div>
-            <h2>Prestige</h2>
-          </div>
-        </div>
-        <p class="section-description">
-          Ascend to restart your bakery and gain permanent production bonuses.
-        </p>
-        <div class="prestige-stats">
-          <div>
-            <span class="muted-label">Available stars</span>
-            <strong id="availableStars">0</strong>
-          </div>
-          <div>
-            <span class="muted-label">Production bonus</span>
-            <strong id="prestigeBonus">+0%</strong>
-          </div>
-        </div>
-        <p class="prestige-note" id="prestigeNote">
-          Bake 1 million lifetime cookies to unlock your first star.
-        </p>
-        <button class="primary-button" id="prestigeButton" disabled>
-          Ascend to a new era
-        </button>
-      </section>
+      <div class="shop-buy-modes">
+        <button class="buy-mode active" data-buy-mode="1">Buy 1</button>
+        <button class="buy-mode" data-buy-mode="10">Buy 10</button>
+        <button class="buy-mode" data-buy-mode="100">Buy 100</button>
+        <button class="buy-mode" data-buy-mode="max">Buy Max</button>
+      </div>
+
+      <div class="shop-list" id="shopList"></div>
     </aside>
+
   </main>
 
+  <div class="modal-backdrop" id="modalBackdrop" hidden>
+
+    <section class="modal panel" id="settingsModal"
+      role="dialog" aria-modal="true"
+      aria-labelledby="settingsTitle" hidden>
+      <div class="modal-heading">
+        <div>
+          <div class="eyebrow">MAKE IT YOURS</div>
+          <h2 id="settingsTitle">Settings</h2>
+        </div>
+        <button class="close-button" data-close-modal
+          aria-label="Close settings">✕</button>
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <strong>Click effects</strong>
+          <p>Floating cookie numbers and click particles.</p>
+        </div>
+        <label class="switch">
+          <input id="clickEffectsToggle" type="checkbox" checked>
+          <span></span>
+        </label>
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <strong>Music</strong>
+          <p>Background music toggle (music can be added later).</p>
+        </div>
+        <label class="switch">
+          <input id="musicToggle" type="checkbox">
+          <span></span>
+        </label>
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <strong>Reduced motion</strong>
+          <p>Keep animations subtle.</p>
+        </div>
+        <label class="switch">
+          <input id="reducedMotionToggle" type="checkbox">
+          <span></span>
+        </label>
+      </div>
+
+      <button class="primary-button" id="settingsDoneButton">Done</button>
+    </section>
+
+    <section class="modal panel" id="rebirthModal"
+      role="dialog" aria-modal="true"
+      aria-labelledby="rebirthTitle" hidden>
+      <div class="modal-heading">
+        <div>
+          <div class="eyebrow">START AGAIN, STRONGER</div>
+          <h2 id="rebirthTitle">Rebirth</h2>
+        </div>
+        <button class="close-button" data-close-modal
+          aria-label="Close rebirth">✕</button>
+      </div>
+
+      <p class="section-description">
+        Rebirth resets your current cookies and buildings.
+        Each rebirth grants a permanent +5% production bonus.
+        Your lifetime cookies, achievements, prestige, and
+        rebirth count stay.
+      </p>
+
+      <div class="modal-stat">
+        <span>Rebirths</span>
+        <strong id="rebirthCount">0</strong>
+      </div>
+      <div class="modal-stat">
+        <span>Rebirth bonus</span>
+        <strong id="rebirthBonus">+0%</strong>
+      </div>
+
+      <p class="prestige-note" id="rebirthNote">
+        Earn 100,000 cookies in this run to unlock rebirth.
+      </p>
+      <button class="primary-button" id="rebirthButton" disabled>
+        Rebirth
+      </button>
+    </section>
+
+    <section class="modal panel" id="prestigeModal"
+      role="dialog" aria-modal="true"
+      aria-labelledby="prestigeTitle" hidden>
+      <div class="modal-heading">
+        <div>
+          <div class="eyebrow">THE NEXT CHAPTER</div>
+          <h2 id="prestigeTitle">Prestige</h2>
+        </div>
+        <button class="close-button" data-close-modal
+          aria-label="Close prestige">✕</button>
+      </div>
+
+      <p class="section-description">
+        Ascend to restart your bakery and gain permanent production bonuses.
+      </p>
+
+      <div class="modal-stat">
+        <span>Available stars</span>
+        <strong id="availableStars">0</strong>
+      </div>
+      <div class="modal-stat">
+        <span>Production bonus</span>
+        <strong id="prestigeBonus">+0%</strong>
+      </div>
+
+      <p class="prestige-note" id="prestigeNote">
+        Bake 1 million lifetime cookies to unlock your first star.
+      </p>
+      <button class="primary-button" id="prestigeButton" disabled>
+        Ascend to a new era
+      </button>
+    </section>
+
+    <section class="modal panel" id="achievementsModal"
+      role="dialog" aria-modal="true"
+      aria-labelledby="achievementsTitle" hidden>
+      <div class="modal-heading">
+        <div>
+          <div class="eyebrow">MILESTONES</div>
+          <h2 id="achievementsTitle">
+            Achievements
+            <span class="item-count" id="achievementCount">0 / 8</span>
+          </h2>
+        </div>
+        <button class="close-button" data-close-modal
+          aria-label="Close achievements">✕</button>
+      </div>
+
+      <div class="achievement-list" id="achievementList"></div>
+    </section>
+
+    <section class="modal panel" id="codeModal"
+      role="dialog" aria-modal="true"
+      aria-labelledby="codeTitle" hidden>
+      <div class="modal-heading">
+        <div>
+          <div class="eyebrow">A LITTLE BONUS</div>
+          <h2 id="codeTitle">Redeem Code</h2>
+        </div>
+        <button class="close-button" data-close-modal
+          aria-label="Close redeem code">✕</button>
+      </div>
+
+      <p class="section-description">
+        Enter a code to claim a cookie reward. Each code can only be used once.
+      </p>
+
+      <form id="codeForm" class="code-form">
+        <input id="codeInput" type="text" maxlength="40"
+          autocomplete="off" placeholder="Enter code..."
+          aria-label="Redeem code">
+        <button class="primary-button" type="submit">Redeem</button>
+      </form>
+
+      <p class="prestige-note">
+        Try: <code>COOKIESTART</code> or <code>GOLDENCOOKIE</code>
+      </p>
+    </section>
+
+  </div>
+
   <footer>
-    <span>COOKIE CLICKER</span>
+    <span>COOKIE EMPIRE</span>
     <span>Your bakery saves automatically in this browser.</span>
   </footer>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
 </body>
 </html>
