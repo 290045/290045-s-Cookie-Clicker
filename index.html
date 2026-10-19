@@ -1,1 +1,153 @@
-Soon!
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#17151f">
+  <title>290045's Cookie Clicker</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#">
+      <span class="brand-icon">C</span>
+      <span>COOKIE<span class="brand-light">CLICKER</span></span>
+    </a>
+    <div class="top-actions">
+      <span class="save-status" id="saveStatus">● Saved</span>
+      <button class="small-button" id="saveButton">Save</button>
+      <button class="small-button danger-button" id="resetButton">Reset</button>
+    </div>
+  </header>
+
+  <main class="game-layout">
+    <section class="main-panel panel">
+      <div class="eyebrow">YOUR BAKERY</div>
+      <h1>Cookie Empire</h1>
+      <p class="subtitle">Every click brings you closer to cookie domination.</p>
+
+      <div class="cookie-total" id="cookieCount">0</div>
+      <div class="cookie-label">COOKIES BAKED</div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <span>Per click</span>
+          <strong id="clickPower">1</strong>
+        </div>
+        <div class="stat-card">
+          <span>Per second</span>
+          <strong id="cps">0</strong>
+        </div>
+        <div class="stat-card">
+          <span>Buildings</span>
+          <strong id="buildingCount">0</strong>
+        </div>
+      </div>
+
+      <div class="cookie-stage">
+        <div class="cookie-glow"></div>
+        <button class="cookie-button" id="cookieButton"
+          aria-label="Bake a cookie" title="Click to bake cookies">
+          <svg class="pixel-cookie" viewBox="0 0 128 128"
+            xmlns="http://www.w3.org/2000/svg"
+            shape-rendering="crispEdges" aria-hidden="true">
+            <path fill="#63371f" d="M40 8h40v8h16v8h8v16h8v32h-8v16h-8v16H80v8H40v-8H24V96h-8V80H8V48h8V32h8V24h16z"/>
+            <path fill="#c77b36" d="M40 16h40v8h16v16h8v32h-8v16H80v8H40v-8H24V80h-8V48h8V32h16z"/>
+            <path fill="#f2bd65" d="M40 24h40v8h16v16h8v24H96v16H80v8H40v-8H24V80h-8V48h8V40h16z"/>
+            <path fill="#ffe09a" d="M40 24h24v8H48v8H32v8h-8v16h-8V48h8V40h8V32h8z"/>
+            <path fill="#79401f" d="M40 32h8v8h-8z M72 24h8v8h-8z M88 40h8v8h-8z M32 56h8v8h-8z M56 72h8v8h-8z M80 64h8v8h-8z M40 88h8v8h-8z M72 88h8v8h-8z"/>
+            <path fill="#45271c" d="M40 32h8v8h-8z M72 24h8v8h-8z M88 40h8v8h-8z M32 56h8v8h-8z M56 72h8v8h-8z M80 64h8v8h-8z M40 88h8v8h-8z M72 88h8v8h-8z"/>
+            <path fill="#f8d98f" d="M32 40h8v8h-8z M48 24h8v8h-8z M24 48h8v8h-8z"/>
+          </svg>
+        </button>
+        <div class="click-hint">CLICK THE COOKIE!</div>
+        <div class="floating-layer" id="floatingLayer"></div>
+      </div>
+
+      <div class="progress-section">
+        <div class="progress-heading">
+          <span>Next achievement</span>
+          <span id="achievementProgress">0 / 10 cookies</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+
+      <div class="bottom-stats">
+        <div>
+          <span class="muted-label">Lifetime cookies</span>
+          <strong id="lifetimeCookies">0</strong>
+        </div>
+        <div>
+          <span class="muted-label">Prestige level</span>
+          <strong id="prestigeLevel">0</strong>
+        </div>
+      </div>
+    </section>
+
+    <aside class="side-column">
+      <section class="panel shop-panel">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">EXPAND YOUR EMPIRE</div>
+            <h2>Cookie Shop</h2>
+          </div>
+          <span class="item-count" id="shopCount">6 items</span>
+        </div>
+        <p class="section-description">Purchase buildings to bake cookies automatically.</p>
+        <div class="shop-list" id="shopList"></div>
+      </section>
+
+      <section class="panel achievement-panel">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">MILESTONES</div>
+            <h2>Achievements</h2>
+          </div>
+          <span class="item-count" id="achievementCount">0 / 8</span>
+        </div>
+        <div class="achievement-list" id="achievementList"></div>
+      </section>
+
+      <section class="panel prestige-panel">
+        <div class="prestige-top">
+          <div class="prestige-icon">✦</div>
+          <div>
+            <div class="eyebrow">THE NEXT CHAPTER</div>
+            <h2>Prestige</h2>
+          </div>
+        </div>
+        <p class="section-description">
+          Ascend to restart your bakery and gain permanent production bonuses.
+        </p>
+        <div class="prestige-stats">
+          <div>
+            <span class="muted-label">Available stars</span>
+            <strong id="availableStars">0</strong>
+          </div>
+          <div>
+            <span class="muted-label">Production bonus</span>
+            <strong id="prestigeBonus">+0%</strong>
+          </div>
+        </div>
+        <p class="prestige-note" id="prestigeNote">
+          Bake 1 million lifetime cookies to unlock your first star.
+        </p>
+        <button class="primary-button" id="prestigeButton" disabled>
+          Ascend to a new era
+        </button>
+      </section>
+    </aside>
+  </main>
+
+  <footer>
+    <span>COOKIE CLICKER</span>
+    <span>Your bakery saves automatically in this browser.</span>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
