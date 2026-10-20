@@ -239,11 +239,12 @@ function bulkCost(building) {
   return { count, total };
 }
 
+
 function buyBuilding(id) {
   const building = BUILDINGS.find(b => b.id === id);
   if (!building) return;
 
-  // Recalculate the purchase at click time using current cookies.
+  // Calculate the price using the latest cookie balance.
   const purchase = bulkCost(building);
 
   if (purchase.count < 1 || purchase.total > state.cookies) {
@@ -252,19 +253,21 @@ function buyBuilding(id) {
     return;
   }
 
+  // Complete the purchase.
   state.cookies -= purchase.total;
   state.buildings[id] += purchase.count;
 
+  // Update achievements and save progress.
   checkAchievements();
   saveGame();
 
-  // Immediately refresh the shop and all displayed stats.
+  // Immediately refresh the entire display and shop.
   render();
   renderShop();
 
   toast(
     `${purchase.count} ${building.name}` +
-    `${purchase.count > 1 ? "s" : ""} purchased!`
+    `${purchase.count === 1 ? "" : "s"} purchased!`
   );
 }
 
