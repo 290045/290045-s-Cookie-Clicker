@@ -95,6 +95,7 @@ const ui = {
 
 function formatNumber(n) {
   if (!Number.isFinite(n)) return "∞";
+
   if (n < 1000) {
     return n.toLocaleString("en-US", {
       maximumFractionDigits: n < 10 ? 1 : 0
@@ -103,6 +104,7 @@ function formatNumber(n) {
 
   const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No"];
   const tier = Math.floor(Math.log10(n) / 3);
+
   if (tier >= suffixes.length) return n.toExponential(2);
 
   return (n / Math.pow(1000, tier)).toLocaleString("en-US", {
@@ -110,6 +112,7 @@ function formatNumber(n) {
   }) + suffixes[tier];
 }
 
+// CPS-specific formatter: preserves useful decimal places.
 function formatCps(n) {
   if (!Number.isFinite(n)) return "∞";
 
@@ -138,7 +141,8 @@ function clickPower() {
 
 function cookiesPerSecond() {
   return BUILDINGS.reduce(
-    (sum, b) => sum + state.buildings[b.id] * b.cps, 0
+    (sum, b) => sum + state.buildings[b.id] * b.cps,
+    0
   ) * totalMultiplier();
 }
 
@@ -159,10 +163,16 @@ function availableStars() {
 // ========================================
 
 function toast(message) {
+  if (!ui.toast) return;
+
   ui.toast.textContent = message;
   ui.toast.classList.add("visible");
+
   clearTimeout(toastTimeout);
-  toastTimeout = setTimeout(() => ui.toast.classList.remove("visible"), 2600);
+  toastTimeout = setTimeout(
+    () => ui.toast.classList.remove("visible"),
+    2600
+  );
 }
 
 function clickCookie(event) {
@@ -173,7 +183,9 @@ function clickCookie(event) {
   state.totalEarned += amount;
   state.totalClicks++;
 
-  if (state.settings.clickEffects) showFloatingNumber(amount, event);
+  if (state.settings.clickEffects) {
+    showFloatingNumber(amount, event);
+  }
 
   if (!state.settings.reducedMotion) {
     ui.cookieButton.classList.remove("clicked");
@@ -191,8 +203,11 @@ function showFloatingNumber(amount, event) {
   el.textContent = "+" + formatNumber(amount);
 
   const rect = ui.floatingLayer.getBoundingClientRect();
-  el.style.left = `${(event?.clientX || rect.left + rect.width / 2) - rect.left}px`;
-  el.style.top = `${(event?.clientY || rect.top + rect.height / 2) - rect.top}px`;
+
+  el.style.left =
+    `${(event?.clientX || rect.left + rect.width / 2) - rect.left}px`;
+  el.style.top =
+    `${(event?.clientY || rect.top + rect.height / 2) - rect.top}px`;
 
   ui.floatingLayer.appendChild(el);
   setTimeout(() => el.remove(), 950);
@@ -212,7 +227,9 @@ function bulkCost(building) {
 
   while (count < limit) {
     const cost = buildingCost(building, owned + count);
+
     if (remaining < cost) break;
+
     remaining -= cost;
     total += cost;
     count++;
@@ -225,22 +242,34 @@ function buyBuilding(id) {
   const building = BUILDINGS.find(b => b.id === id);
   if (!building) return;
 
+  // Recalculate the purchase at click time using current cookies.
   const purchase = bulkCost(building);
-  if (!purchase.count) {
+
+  if (purchase.count < 1 || purchase.total > state.cookies) {
     toast("You need more cookies!");
+    renderShop();
     return;
   }
 
   state.cookies -= purchase.total;
   state.buildings[id] += purchase.count;
 
-  toast(`${purchase.count} ${building.name}${purchase.count > 1 ? "s" : ""} purchased!`);
   checkAchievements();
-  render();
   saveGame();
+
+  // Immediately refresh the shop and all displayed stats.
+  render();
+  renderShop();
+
+  toast(
+    `${purchase.count} ${building.name}` +
+    `${purchase.count > 1 ? "s" : ""} purchased!`
+  );
 }
 
 function renderShop() {
+  if (!ui.shopList) return;
+
   ui.shopList.innerHTML = "";
 
   BUILDINGS.forEach(building => {
@@ -265,7 +294,7 @@ function renderShop() {
     const description = document.createElement("div");
     description.className = "building-description";
     description.textContent =
-      `${building.description} +${formatNumber(building.cps)} cookies/sec`;
+      `${building.description} +${formatCps(building.cps)} cookies/sec`;
 
     const ownedLabel = document.createElement("div");
     ownedLabel.className = "building-owned";
@@ -279,10 +308,16 @@ function renderShop() {
     button.disabled = !affordable;
 
     const label = document.createElement("strong");
-    label.textContent = `BUY ${purchase.count}`;
+    label.textContent = purchase.count > 0
+      ? `BUY ${purchase.count}`
+      : buyMode === "max"
+        ? "BUY MAX"
+        : `BUY ${buyMode}`;
 
     const price = document.createElement("span");
-    price.textContent = "🍪 " + formatNumber(purchase.total);
+    price.textContent = purchase.count > 0
+      ? `TOTAL: 🍪 ${formatNumber(purchase.total)}`
+      : `Need 🍪 ${formatNumber(buildingCost(building))}`;
 
     button.append(label, price);
     button.addEventListener("click", () => buyBuilding(building.id));
@@ -321,6 +356,8 @@ function checkAchievements() {
 }
 
 function renderAchievements() {
+  if (!ui.achievementList) return;
+
   ui.achievementList.innerHTML = "";
   let unlockedCount = 0;
 
@@ -359,7 +396,10 @@ function renderAchievements() {
     ui.achievementList.appendChild(card);
   });
 
-  ui.achievementCount.textContent = `${unlockedCount} / ${ACHIEVEMENTS.length}`;
+  if (ui.achievementCount) {
+    ui.achievementCount.textContent =
+      `${unlockedCount} / ${ACHIEVEMENTS.length}`;
+  }
 }
 
 // ========================================
@@ -368,24 +408,39 @@ function renderAchievements() {
 
 function renderPrestige() {
   const available = availableStars();
-  const nextTarget = Math.pow(state.prestige + 1, 2) * PRESTIGE_REQUIREMENT;
+  const nextTarget =
+    Math.pow(state.prestige + 1, 2) * PRESTIGE_REQUIREMENT;
 
-  ui.availableStars.textContent = formatNumber(available);
-  ui.prestigeLevel.textContent = formatNumber(state.prestige);
-  ui.prestigeBonus.textContent =
-    "+" + formatNumber((state.prestige * PRESTIGE_BONUS_PER_STAR +
-      state.rebirths * REBIRTH_BONUS) * 100) + "%";
+  if (ui.availableStars) {
+    ui.availableStars.textContent = formatNumber(available);
+  }
 
-  ui.prestigeButton.disabled = available < 1;
+  if (ui.prestigeBonus) {
+    ui.prestigeBonus.textContent =
+      "+" + formatNumber(
+        (state.prestige * PRESTIGE_BONUS_PER_STAR +
+          state.rebirths * REBIRTH_BONUS) * 100
+      ) + "%";
+  }
 
-  if (available > 0) {
-    ui.prestigeNote.textContent =
-      `Ascend now for ${formatNumber(available)} star(s). Cookies and buildings will reset.`;
-    ui.prestigeButton.textContent = `Ascend for ${formatNumber(available)} star(s)`;
-  } else {
-    ui.prestigeNote.textContent =
-      `Bake ${formatNumber(Math.max(0, nextTarget - state.totalEarned))} more lifetime cookies to reach your next milestone.`;
-    ui.prestigeButton.textContent = "Ascend to a new era";
+  if (ui.prestigeButton) {
+    ui.prestigeButton.disabled = available < 1;
+  }
+
+  if (ui.prestigeNote) {
+    if (available > 0) {
+      ui.prestigeNote.textContent =
+        `Ascend now for ${formatNumber(available)} star(s). Cookies and buildings will reset.`;
+    } else {
+      ui.prestigeNote.textContent =
+        `Bake ${formatNumber(Math.max(0, nextTarget - state.totalEarned))} more lifetime cookies to reach your next milestone.`;
+    }
+  }
+
+  if (ui.prestigeButton) {
+    ui.prestigeButton.textContent = available > 0
+      ? `Ascend for ${formatNumber(available)} star(s)`
+      : "Ascend to a new era";
   }
 
   renderRebirth();
@@ -393,7 +448,10 @@ function renderPrestige() {
 
 function ascend() {
   const available = availableStars();
-  if (available < 1) return toast("You need more lifetime cookies to ascend.");
+
+  if (available < 1) {
+    return toast("You need more lifetime cookies to ascend.");
+  }
 
   if (!confirm(
     `Ascend and earn ${available} prestige star(s)?\n\n` +
@@ -417,15 +475,26 @@ function ascend() {
 // ========================================
 
 function renderRebirth() {
-  $("rebirthCount").textContent = formatNumber(state.rebirths);
-  $("rebirthBonus").textContent = "+" + formatNumber(state.rebirths * 5) + "%";
+  if (ui.rebirthCount) {
+    ui.rebirthCount.textContent = formatNumber(state.rebirths);
+  }
+
+  if (ui.rebirthBonus) {
+    ui.rebirthBonus.textContent =
+      "+" + formatNumber(state.rebirths * 5) + "%";
+  }
 
   const ready = state.runEarned >= REBIRTH_REQUIREMENT;
-  ui.rebirthButton.disabled = !ready;
 
-  ui.rebirthNote.textContent = ready
-    ? "Ready! Rebirth resets current cookies and buildings."
-    : `Earn ${formatNumber(REBIRTH_REQUIREMENT - state.runEarned)} more cookies this run to unlock rebirth.`;
+  if (ui.rebirthButton) {
+    ui.rebirthButton.disabled = !ready;
+  }
+
+  if (ui.rebirthNote) {
+    ui.rebirthNote.textContent = ready
+      ? "Ready! Rebirth resets current cookies and buildings."
+      : `Earn ${formatNumber(REBIRTH_REQUIREMENT - state.runEarned)} more cookies this run to unlock rebirth.`;
+  }
 }
 
 function doRebirth() {
@@ -455,19 +524,42 @@ function doRebirth() {
 // ========================================
 
 function syncSettings() {
-  ui.clickEffectsToggle.checked = state.settings.clickEffects;
-  ui.musicToggle.checked = state.settings.music;
-  ui.reducedMotionToggle.checked = state.settings.reducedMotion;
+  if (ui.clickEffectsToggle) {
+    ui.clickEffectsToggle.checked = state.settings.clickEffects;
+  }
 
-  document.body.classList.toggle("reduced-motion", state.settings.reducedMotion);
+  if (ui.musicToggle) {
+    ui.musicToggle.checked = state.settings.music;
+  }
+
+  if (ui.reducedMotionToggle) {
+    ui.reducedMotionToggle.checked = state.settings.reducedMotion;
+  }
+
+  document.body.classList.toggle(
+    "reduced-motion",
+    state.settings.reducedMotion
+  );
 }
 
 function applySettings() {
-  state.settings.clickEffects = ui.clickEffectsToggle.checked;
-  state.settings.music = ui.musicToggle.checked;
-  state.settings.reducedMotion = ui.reducedMotionToggle.checked;
+  if (ui.clickEffectsToggle) {
+    state.settings.clickEffects = ui.clickEffectsToggle.checked;
+  }
 
-  document.body.classList.toggle("reduced-motion", state.settings.reducedMotion);
+  if (ui.musicToggle) {
+    state.settings.music = ui.musicToggle.checked;
+  }
+
+  if (ui.reducedMotionToggle) {
+    state.settings.reducedMotion = ui.reducedMotionToggle.checked;
+  }
+
+  document.body.classList.toggle(
+    "reduced-motion",
+    state.settings.reducedMotion
+  );
+
   saveGame();
 
   if (state.settings.music) {
@@ -482,29 +574,38 @@ function applySettings() {
 function redeemCode(event) {
   event.preventDefault();
 
-  const code = $("codeInput").value.trim().toUpperCase();
+  const input = $("codeInput");
+  const code = input.value.trim().toUpperCase();
+
   const rewards = {
     COOKIESTART: 1000,
     GOLDENCOOKIE: 10000
   };
 
   if (!code) return toast("Enter a code first.");
-  if (!Object.hasOwn(rewards, code)) return toast("That code isn't valid.");
+
+  if (!Object.hasOwn(rewards, code)) {
+    return toast("That code isn't valid.");
+  }
+
   if (state.redeemedCodes.includes(code)) {
     return toast("You've already redeemed that code.");
   }
 
   const reward = rewards[code];
+
   state.cookies += reward;
   state.runEarned += reward;
   state.totalEarned += reward;
   state.redeemedCodes.push(code);
 
-  $("codeInput").value = "";
+  input.value = "";
+
   checkAchievements();
   render();
   saveGame();
   closePanels();
+
   toast(`Code redeemed! +${formatNumber(reward)} cookies.`);
 }
 
@@ -540,11 +641,13 @@ function toggleShop() {
   if (opening) {
     $("menuDropdown").hidden = true;
     $("menuButton").setAttribute("aria-expanded", "false");
+    renderShop();
   }
 }
 
 $("menuButton").addEventListener("click", () => {
   const dropdown = $("menuDropdown");
+
   dropdown.hidden = !dropdown.hidden;
   $("menuButton").setAttribute("aria-expanded", String(!dropdown.hidden));
 
@@ -555,7 +658,9 @@ $("menuButton").addEventListener("click", () => {
 });
 
 document.querySelectorAll("[data-open-panel]").forEach(button => {
-  button.addEventListener("click", () => openPanel(button.dataset.openPanel));
+  button.addEventListener("click", () => {
+    openPanel(button.dataset.openPanel);
+  });
 });
 
 document.querySelectorAll("[data-close-modal], [data-close-panel]").forEach(button => {
@@ -567,6 +672,7 @@ $("modalBackdrop").addEventListener("click", event => {
 });
 
 $("shopButton").addEventListener("click", toggleShop);
+
 $("settingsDoneButton").addEventListener("click", () => {
   applySettings();
   closePanels();
@@ -576,7 +682,9 @@ $("settingsDoneButton").addEventListener("click", () => {
   ui.clickEffectsToggle,
   ui.musicToggle,
   ui.reducedMotionToggle
-].forEach(input => input.addEventListener("change", applySettings));
+].filter(Boolean).forEach(input => {
+  input.addEventListener("change", applySettings);
+});
 
 $("rebirthButton").addEventListener("click", doRebirth);
 $("codeForm").addEventListener("submit", redeemCode);
@@ -611,6 +719,7 @@ function saveGame() {
     }));
 
     lastSave = Date.now();
+
     if (ui.saveStatus) {
       ui.saveStatus.textContent = "● Saved";
       ui.saveStatus.style.color = "var(--green)";
@@ -641,12 +750,17 @@ function loadGame() {
       prestige: Math.floor(validNumber(loaded.prestige)),
       rebirths: Math.floor(validNumber(loaded.rebirths)),
       buildings: { ...fresh.buildings },
+
       achievements: Array.isArray(loaded.achievements)
-        ? loaded.achievements.filter(id => ACHIEVEMENTS.some(a => a.id === id))
+        ? loaded.achievements.filter(id =>
+            ACHIEVEMENTS.some(a => a.id === id)
+          )
         : [],
+
       redeemedCodes: Array.isArray(loaded.redeemedCodes)
         ? loaded.redeemedCodes.filter(code => typeof code === "string")
         : [],
+
       settings: {
         clickEffects: loaded.settings?.clickEffects !== false,
         music: loaded.settings?.music === true,
@@ -655,12 +769,14 @@ function loadGame() {
     };
 
     BUILDINGS.forEach(b => {
-      state.buildings[b.id] = Math.floor(validNumber(loaded.buildings?.[b.id]));
+      state.buildings[b.id] = Math.floor(
+        validNumber(loaded.buildings?.[b.id])
+      );
     });
 
     checkAchievements();
 
-    // Keep the existing game's offline production feature.
+    // Offline production is capped at eight hours.
     if (typeof data.savedAt === "number") {
       const seconds = Math.min(
         Math.max(0, (Date.now() - data.savedAt) / 1000),
@@ -673,7 +789,10 @@ function loadGame() {
         state.cookies += offline;
         state.runEarned += offline;
         state.totalEarned += offline;
-        toast(`Welcome back! You earned ${formatNumber(offline)} cookies offline.`);
+
+        toast(
+          `Welcome back! You earned ${formatNumber(offline)} cookies offline.`
+        );
       }
     }
   } catch (error) {
@@ -683,9 +802,11 @@ function loadGame() {
 }
 
 function validNumber(value) {
-  return typeof value === "number" && Number.isFinite(value) && value >= 0
-    ? value
-    : 0;
+  return typeof value === "number" &&
+    Number.isFinite(value) &&
+    value >= 0
+      ? value
+      : 0;
 }
 
 // ========================================
@@ -716,11 +837,17 @@ function resetGame() {
 // ========================================
 
 function render() {
-  ui.cookieCount.textContent = formatNumber(state.cookies);
-  ui.clickPower.textContent = formatNumber(clickPower());
-  ui.cps.textContent = formatNumber(cookiesPerSecond());
-  ui.buildingCount.textContent = formatNumber(buildingCount());
-  ui.lifetimeCookies.textContent = formatNumber(state.totalEarned);
+  if (ui.cookieCount) {
+    ui.cookieCount.textContent = formatNumber(state.cookies);
+  }
+
+  if (ui.clickPower) {
+    ui.clickPower.textContent = formatNumber(clickPower());
+  }
+
+  if (ui.cps) {
+    ui.cps.textContent = formatCps(cookiesPerSecond());
+  }
 
   const next = ACHIEVEMENTS.find(a =>
     a.goal !== undefined && !hasAchievement(a.id)
@@ -736,15 +863,27 @@ function render() {
 
     const progress = Math.min(
       100,
-      Math.max(0, ((state.totalEarned - previous) / (next.goal - previous)) * 100)
+      Math.max(
+        0,
+        ((state.totalEarned - previous) / (next.goal - previous)) * 100
+      )
     );
 
-    ui.progressFill.style.width = progress + "%";
-    ui.achievementProgress.textContent =
-      `${formatNumber(state.totalEarned)} / ${formatNumber(next.goal)} cookies`;
+    if (ui.progressFill) {
+      ui.progressFill.style.width = progress + "%";
+    }
+
+    if (ui.achievementProgress) {
+      ui.achievementProgress.textContent =
+        `${formatNumber(state.totalEarned)} / ${formatNumber(next.goal)} cookies`;
+    }
   } else {
-    ui.progressFill.style.width = "100%";
-    ui.achievementProgress.textContent = "All cookie milestones reached!";
+    if (ui.progressFill) ui.progressFill.style.width = "100%";
+
+    if (ui.achievementProgress) {
+      ui.achievementProgress.textContent =
+        "All cookie milestones reached!";
+    }
   }
 
   renderShop();
@@ -759,6 +898,7 @@ function render() {
 function gameLoop() {
   const now = Date.now();
   const elapsed = Math.min((now - lastTick) / 1000, 1);
+
   lastTick = now;
 
   const produced = cookiesPerSecond() * elapsed;
@@ -775,7 +915,9 @@ function gameLoop() {
     lastRender = now;
   }
 
-  if (now - lastSave >= 5000) saveGame();
+  if (now - lastSave >= 5000) {
+    saveGame();
+  }
 }
 
 ui.cookieButton.addEventListener("click", clickCookie);
@@ -786,6 +928,7 @@ $("resetButton").addEventListener("click", resetGame);
 loadGame();
 syncSettings();
 render();
+
 lastTick = Date.now();
 
 setInterval(gameLoop, 100);
