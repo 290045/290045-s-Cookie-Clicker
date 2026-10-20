@@ -1,15 +1,18 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#111019">
+  <meta name="theme-color" content="#10051f">
+  <meta name="description" content="Build your cookie empire in this purple cosmic cookie clicker game.">
   <title>Cookie Empire</title>
   <link rel="stylesheet" href="styles.css">
   <script src="script.js" defer></script>
 </head>
 <body class="game-screen">
 
+  <!-- TOP BAR -->
   <header class="topbar game-topbar">
     <div class="left-controls">
       <button class="icon-button" id="menuButton"
@@ -25,94 +28,176 @@
     </div>
 
     <a class="brand" href="#" aria-label="Cookie Empire home">
-      <span class="brand-icon">🍪</span>
+      <span class="brand-icon" aria-hidden="true">🍪</span>
       <span>COOKIE<span class="brand-light"> EMPIRE</span></span>
     </a>
 
+    <div class="header-counters">
+      <div class="header-counter">
+        <span class="counter-icon" aria-hidden="true">🍪</span>
+        <div>
+          <span class="counter-label">Cookies</span>
+          <strong id="cookieCount">0</strong>
+        </div>
+      </div>
+
+      <div class="header-counter">
+        <span class="counter-icon cursor-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M4 2.5a1 1 0 0 1 1.65-.76l14.1 11.9a1 1 0 0 1-.64 1.76h-6.5l3.55 5.25-2.5 1.7-3.65-5.5-3.4 4.25a1 1 0 0 1-1.78-.62L4 2.5Z"/>
+          </svg>
+        </span>
+        <div>
+          <span class="counter-label">CPS</span>
+          <strong id="cps">0</strong>
+        </div>
+      </div>
+    </div>
+
     <div class="top-actions">
       <span class="save-status" id="saveStatus">● Saved</span>
-      <button class="small-button" id="saveButton">Save</button>
-      <button class="small-button danger-button" id="resetButton">Reset</button>
+      <button class="small-button" id="saveButton">▣ Save</button>
+      <button class="small-button danger-button" id="resetButton">↻ Reset</button>
       <button class="shop-toggle" id="shopButton"
         aria-expanded="false">🏪 <span>Shop</span> ▾</button>
     </div>
   </header>
 
+  <!-- MAIN GAME -->
   <main class="game-layout redesigned-layout">
 
-    <section class="main-panel panel">
-      <div class="eyebrow">YOUR BAKERY</div>
-      <h1>Cookie Empire</h1>
-      <p class="subtitle">Click, bake, upgrade, repeat.</p>
+    <!-- LEFT SIDEBAR -->
+    <aside class="left-sidebar">
 
-      <div class="cookie-total" id="cookieCount">0</div>
-      <div class="cookie-label">COOKIES BAKED</div>
+      <section class="panel sidebar-card progress-card">
+        <div class="section-heading">
+          <span class="heading-icon" aria-hidden="true">👑</span>
+          <h2>YOUR PROGRESS</h2>
+        </div>
 
-     <div class="stats-row">
-  <div class="stat-card">
-    <span>Per click</span>
-    <strong id="clickPower">1</strong>
-  </div>
-  <div class="stat-card">
-    <span>Per second</span>
-    <strong id="cps">0.0</strong>
-  </div>
-</div>
+        <div class="progress-section">
+          <div class="progress-heading">
+            <span>Next achievement</span>
+            <span id="achievementProgress">0 / 10 cookies</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+        </div>
+      </section>
+
+      <button class="panel sidebar-card achievement-shortcut"
+        data-open-panel="achievementsModal">
+        <span class="heading-icon" aria-hidden="true">🏆</span>
+        <span class="shortcut-content">
+          <strong>ACHIEVEMENTS</strong>
+          <span id="achievementShortcutCount">0 / 8</span>
+        </span>
+        <span class="shortcut-arrow" aria-hidden="true">›</span>
+      </button>
+
+      <section class="panel sidebar-card stats-card">
+        <div class="section-heading">
+          <span class="heading-icon" aria-hidden="true">📊</span>
+          <h2>YOUR STATS</h2>
+        </div>
+
+        <div class="sidebar-stat">
+          <span class="stat-icon cursor-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M4 2.5a1 1 0 0 1 1.65-.76l14.1 11.9a1 1 0 0 1-.64 1.76h-6.5l3.55 5.25-2.5 1.7-3.65-5.5-3.4 4.25a1 1 0 0 1-1.78-.62L4 2.5Z"/>
+            </svg>
+          </span>
+          <div>
+            <span>Per click</span>
+            <strong id="clickPower">1</strong>
+          </div>
+        </div>
+
+        <div class="sidebar-stat">
+          <span class="stat-icon cursor-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M4 2.5a1 1 0 0 1 1.65-.76l14.1 11.9a1 1 0 0 1-.64 1.76h-6.5l3.55 5.25-2.5 1.7-3.65-5.5-3.4 4.25a1 1 0 0 1-1.78-.62L4 2.5Z"/>
+            </svg>
+          </span>
+          <div>
+            <span>Per second</span>
+            <strong id="sidebarCps">0</strong>
+          </div>
+        </div>
+
+        <div class="sidebar-stat">
+          <span class="stat-icon" aria-hidden="true">🏭</span>
+          <div>
+            <span>Buildings owned</span>
+            <strong id="buildingCount">0</strong>
+          </div>
+        </div>
+
+        <div class="sidebar-stat">
+          <span class="stat-icon" aria-hidden="true">🍪</span>
+          <div>
+            <span>Lifetime cookies</span>
+            <strong id="lifetimeCookies">0</strong>
+          </div>
+        </div>
+
+        <div class="sidebar-stat">
+          <span class="stat-icon" aria-hidden="true">⭐</span>
+          <div>
+            <span>Prestige level</span>
+            <strong id="prestigeLevel">0</strong>
+          </div>
+        </div>
+      </section>
+
+    </aside>
+
+    <!-- CENTER COOKIE AREA -->
+    <section class="main-panel cookie-panel">
 
       <div class="cookie-stage">
-        <div class="cookie-glow"></div>
+        <div class="cookie-glow" aria-hidden="true"></div>
+        <div class="cookie-orbit cookie-orbit-one" aria-hidden="true"></div>
+        <div class="cookie-orbit cookie-orbit-two" aria-hidden="true"></div>
+        <div class="cookie-sparkles" aria-hidden="true"></div>
 
         <button class="cookie-button" id="cookieButton"
           aria-label="Bake a cookie" title="Click to bake cookies">
-          <svg class="pixel-cookie" viewBox="0 0 128 128"
-            xmlns="http://www.w3.org/2000/svg"
-            shape-rendering="crispEdges" aria-hidden="true">
-            <path fill="#63371f"
-              d="M40 8h40v8h16v8h8v16h8v32h-8v16h-8v16H80v8H40v-8H24V96h-8V80H8V48h8V32h8V24h16z"/>
-            <path fill="#c77b36"
-              d="M40 16h40v8h16v16h8v32h-8v16H80v8H40v-8H24V80h-8V48h8V32h16z"/>
-            <path fill="#f2bd65"
-              d="M40 24h40v8h16v16h8v24H96v16H80v8H40v-8H24V80h-8V48h8V40h16z"/>
-            <path fill="#ffe09a"
-              d="M40 24h24v8H48v8H32v8h-8v16h-8V48h8V40h8V32h8z"/>
-            <path fill="#79401f"
-              d="M40 32h8v8h-8z M72 24h8v8h-8z M88 40h8v8h-8z M32 56h8v8h-8z M56 72h8v8h-8z M80 64h8v8h-8z M40 88h8v8h-8z M72 88h8v8h-8z"/>
-            <path fill="#45271c"
-              d="M40 32h8v8h-8z M72 24h8v8h-8z M88 40h8v8h-8z M32 56h8v8h-8z M56 72h8v8h-8z M80 64h8v8h-8z M40 88h8v8h-8z M72 88h8v8h-8z"/>
-            <path fill="#f8d98f"
-              d="M32 40h8v8h-8z M48 24h8v8h-8z M24 48h8v8h-8z"/>
-          </svg>
+          <img
+            class="cookie-art"
+            src="cookie.png"
+            alt="A freshly baked chocolate-chip cookie"
+            draggable="false"
+          >
         </button>
 
-        <div class="click-hint">CLICK THE COOKIE!</div>
+        <div class="click-hint">
+          <span aria-hidden="true">✦</span>
+          CLICK THE COOKIE!
+          <span aria-hidden="true">✦</span>
+        </div>
+
         <div class="floating-layer" id="floatingLayer"></div>
       </div>
 
-      <div class="progress-section">
-        <div class="progress-heading">
-          <span>Next achievement</span>
-          <span id="achievementProgress">0 / 10 cookies</span>
-        </div>
-        <div class="progress-track">
-          <div class="progress-fill" id="progressFill"></div>
-        </div>
-      </div>
     </section>
 
+    <!-- SHOP DRAWER -->
     <aside class="shop-drawer panel" id="shopDrawer"
       aria-label="Cookie shop" hidden>
-      <div class="section-heading">
+
+      <div class="section-heading shop-heading">
+        <span class="shop-heading-icon" aria-hidden="true">🏪</span>
         <div>
-          <div class="eyebrow">EXPAND YOUR EMPIRE</div>
-          <h2>Cookie Shop</h2>
+          <h2>SHOP</h2>
+          <p class="section-description">
+            Purchase buildings to bake cookies automatically.
+          </p>
         </div>
         <button class="close-button" data-close-panel="shopDrawer"
           aria-label="Close shop">✕</button>
       </div>
-
-      <p class="section-description">
-        Purchase buildings to bake cookies automatically.
-      </p>
 
       <div class="shop-buy-modes">
         <button class="buy-mode active" data-buy-mode="1">Buy 1</button>
@@ -126,11 +211,14 @@
 
   </main>
 
+  <!-- MODALS -->
   <div class="modal-backdrop" id="modalBackdrop" hidden>
 
+    <!-- SETTINGS -->
     <section class="modal panel" id="settingsModal"
       role="dialog" aria-modal="true"
       aria-labelledby="settingsTitle" hidden>
+
       <div class="modal-heading">
         <div>
           <div class="eyebrow">MAKE IT YOURS</div>
@@ -154,7 +242,7 @@
       <div class="setting-row">
         <div>
           <strong>Music</strong>
-          <p>Background music toggle (music can be added later).</p>
+          <p>Background music toggle.</p>
         </div>
         <label class="switch">
           <input id="musicToggle" type="checkbox">
@@ -176,9 +264,11 @@
       <button class="primary-button" id="settingsDoneButton">Done</button>
     </section>
 
+    <!-- REBIRTH -->
     <section class="modal panel" id="rebirthModal"
       role="dialog" aria-modal="true"
       aria-labelledby="rebirthTitle" hidden>
+
       <div class="modal-heading">
         <div>
           <div class="eyebrow">START AGAIN, STRONGER</div>
@@ -207,14 +297,17 @@
       <p class="prestige-note" id="rebirthNote">
         Earn 100,000 cookies in this run to unlock rebirth.
       </p>
+
       <button class="primary-button" id="rebirthButton" disabled>
         Rebirth
       </button>
     </section>
 
+    <!-- PRESTIGE -->
     <section class="modal panel" id="prestigeModal"
       role="dialog" aria-modal="true"
       aria-labelledby="prestigeTitle" hidden>
+
       <div class="modal-heading">
         <div>
           <div class="eyebrow">THE NEXT CHAPTER</div>
@@ -240,14 +333,17 @@
       <p class="prestige-note" id="prestigeNote">
         Bake 1 million lifetime cookies to unlock your first star.
       </p>
+
       <button class="primary-button" id="prestigeButton" disabled>
         Ascend to a new era
       </button>
     </section>
 
+    <!-- ACHIEVEMENTS -->
     <section class="modal panel" id="achievementsModal"
       role="dialog" aria-modal="true"
       aria-labelledby="achievementsTitle" hidden>
+
       <div class="modal-heading">
         <div>
           <div class="eyebrow">MILESTONES</div>
@@ -263,9 +359,11 @@
       <div class="achievement-list" id="achievementList"></div>
     </section>
 
+    <!-- REDEEM CODE -->
     <section class="modal panel" id="codeModal"
       role="dialog" aria-modal="true"
       aria-labelledby="codeTitle" hidden>
+
       <div class="modal-heading">
         <div>
           <div class="eyebrow">A LITTLE BONUS</div>
@@ -293,8 +391,12 @@
 
   </div>
 
-  <footer>
-    <span>COOKIE EMPIRE</span>
+  <!-- FOOTER -->
+  <footer class="game-footer">
+    <span class="footer-brand">
+      <span aria-hidden="true">🍪</span>
+      COOKIE EMPIRE
+    </span>
     <span>Your bakery saves automatically in this browser.</span>
   </footer>
 
