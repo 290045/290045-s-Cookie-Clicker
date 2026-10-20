@@ -67,9 +67,6 @@ const ui = {
   cookieCount: $("cookieCount"),
   clickPower: $("clickPower"),
   cps: $("cps"),
-  buildingCount: $("buildingCount"),
-  lifetimeCookies: $("lifetimeCookies"),
-  prestigeLevel: $("prestigeLevel"),
   shopList: $("shopList"),
   achievementCount: $("achievementCount"),
   achievementList: $("achievementList"),
@@ -111,6 +108,19 @@ function formatNumber(n) {
   return (n / Math.pow(1000, tier)).toLocaleString("en-US", {
     maximumFractionDigits: 2
   }) + suffixes[tier];
+}
+
+function formatCps(n) {
+  if (!Number.isFinite(n)) return "∞";
+
+  if (n < 1000) {
+    return n.toLocaleString("en-US", {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 2
+    });
+  }
+
+  return formatNumber(n);
 }
 
 function buildingCount() {
