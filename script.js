@@ -93,12 +93,13 @@ const ui = {
 // NUMBERS AND GAME CALCULATIONS
 // ========================================
 
+
 function formatNumber(n) {
   if (!Number.isFinite(n)) return "∞";
 
   if (n < 1000) {
     return n.toLocaleString("en-US", {
-      maximumFractionDigits: n < 10 ? 1 : 0
+      maximumFractionDigits: 2
     });
   }
 
@@ -631,9 +632,14 @@ function closePanels() {
   $("shopButton").setAttribute("aria-expanded", "false");
 }
 
+
 function toggleShop() {
   const drawer = $("shopDrawer");
   const opening = drawer.hidden;
+
+  if (opening) {
+    renderShop();
+  }
 
   drawer.hidden = !opening;
   $("shopButton").setAttribute("aria-expanded", String(opening));
@@ -641,7 +647,6 @@ function toggleShop() {
   if (opening) {
     $("menuDropdown").hidden = true;
     $("menuButton").setAttribute("aria-expanded", "false");
-    renderShop();
   }
 }
 
